@@ -1,0 +1,39 @@
+[profile.ci.fuzz]
+runs = 10_000
+
+[profile.default]
+ffi = true
+ast = true
+build_info = true
+extra_output = ["storageLayout"]
+evm_version = "cancun"
+
+out = "out"
+fs_permissions = [{ access = "read", path = "out" }]
+
+remappings = [
+  "forge-std/=lib/forge-std/src/",
+
+  "@chainlink-evm/contracts/=lib/ccip-starter-kit-foundry/lib/chainlink-evm/contracts/src/v0.8/",
+  "@chainlink/contracts-ccip/contracts/=lib/ccip-starter-kit-foundry/lib/chainlink-ccip/chains/evm/contracts/",
+  "@chainlink-local/contracts/=lib/ccip-starter-kit-foundry/lib/chainlink-local/src/",
+
+  "@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
+  "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+  "@openzeppelin-foundry-upgrades/=lib/openzeppelin-foundry-upgrades/src/",
+  
+  "@openzeppelin/contracts@4.8.3/=lib/ccip-starter-kit-foundry/lib/openzeppelin-contracts-4.8.3/contracts/",
+  "@openzeppelin/contracts@5.0.2/=lib/ccip-starter-kit-foundry/lib/openzeppelin-contracts-5.0.2/contracts/"
+]
+
+[rpc_endpoints]
+bsc-testnet = "${BSC_TESTNET_RPC_URL}"
+bsc-mainnet = "${BSC_MAINNET_RPC_URL}"
+eth-sepolia = "${ETH_SEPOLIA_RPC_URL}"
+eth-mainnet = "${ETH_MAINNET_RPC_URL}"
+
+[etherscan]
+bsc-testnet = {key="${ETHERSCAN_KEY}",url="${BSC_TESTNET_API_URL}"}
+bsc = {key="${ETHERSCAN_KEY}",url="${BSC_MAINNET_API_URL}"}
+eth = {key="${ETHERSCAN_KEY}",url="${ETH_MAINNET_API_URL}"}
+sepolia = {key="${ETHERSCAN_KEY}",url="${ETH_SEPOLIA_API_URL}"}

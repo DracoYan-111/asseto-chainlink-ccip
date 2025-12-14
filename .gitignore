@@ -1,0 +1,10 @@
+broadcast/
+cache/
+out/
+
+
+node_modules/
+
+.DS_Store
+.env
+.gas-snapshot
