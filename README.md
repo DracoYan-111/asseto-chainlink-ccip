@@ -6,6 +6,10 @@
 
 ## Getting Started
 
+```sh
+git submodule update --init --recursive
+```
+
 Click "Use this template" on [GitHub](https://github.com/foundry-rs/forge-template) to create a new repository with this repo as the initial state.
 
 Or, if your repo already exists, run:

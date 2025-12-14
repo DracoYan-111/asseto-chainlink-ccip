@@ -8,23 +8,33 @@ import {ERC20BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/toke
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-contract Erc20Token is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+contract Erc20Token is
+    Initializable,
+    ERC20Upgradeable,
+    ERC20BurnableUpgradeable,
+    AccessControlUpgradeable,
+    UUPSUpgradeable
+{
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
     address private _ccipAdmin;
 
-    event CCIPAdminTransferred(address indexed previousAdmin, address indexed newAdmin);
+    event CCIPAdminTransferred(
+        address indexed previousAdmin,
+        address indexed newAdmin
+    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(address defaultAdmin, address minter, address upgrader)
-        public
-        initializer
-    {
+    function initialize(
+        address defaultAdmin,
+        address minter,
+        address upgrader
+    ) public initializer {
         __ERC20_init("MyToken", "MTK");
         __ERC20Burnable_init();
         __AccessControl_init();
@@ -39,18 +49,18 @@ contract Erc20Token is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable
         _mint(to, amount);
     }
 
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        override
-        onlyRole(UPGRADER_ROLE)
-    {}
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyRole(UPGRADER_ROLE) {}
 
     // ---- CCT 自助注册需要的接口 ----
     function getCCIPAdmin() external view returns (address) {
         return _ccipAdmin;
     }
 
-    function setCCIPAdmin(address newAdmin) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setCCIPAdmin(
+        address newAdmin
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(newAdmin != address(0), "CCIP admin is zero");
         _setCCIPAdmin(newAdmin);
     }

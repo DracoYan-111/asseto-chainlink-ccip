@@ -6,25 +6,20 @@ import {Upgrades} from "@openzeppelin-foundry-upgrades/Upgrades.sol";
 import {Erc20Token} from "../../src/token/Erc20Token.sol";
 
 contract DeployErc20Token is Script {
-
     uint256 private PRIVATE_KEY;
 
     function run() external {
         PRIVATE_KEY = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(PRIVATE_KEY);
-        
+
         vm.createSelectFork("bsc-testnet");
         vm.startBroadcast(PRIVATE_KEY);
 
-         address proxy = Upgrades.deployUUPSProxy(
-            "Erc20Token.sol:Erc20Token", 
+        address proxy = Upgrades.deployUUPSProxy(
+            "Erc20Token.sol:Erc20Token",
             abi.encodeCall(
-                Erc20Token.initialize, 
-                (
-                    deployer,
-                    deployer,
-                    deployer
-                )
+                Erc20Token.initialize,
+                (deployer, deployer, deployer)
             )
         );
 
@@ -32,6 +27,5 @@ contract DeployErc20Token is Script {
 
         console2.log("Implementation:", address(proxy));
         console2.log("decimals:", Erc20Token(proxy).decimals());
-
     }
 }

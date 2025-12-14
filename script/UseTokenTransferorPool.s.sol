@@ -8,12 +8,13 @@ import {TokenTransferorPool} from "../src/TokenTransferorPool.sol";
 import {IBurnMintERC20} from "@chainlink/contracts/src/v0.8/shared/token/ERC20/IBurnMintERC20.sol";
 
 contract DeployTokenTransferorPool is Script {
-
     uint256 private PRIVATE_KEY;
-    TokenTransferorPool constant tokenTransferorPool = TokenTransferorPool(payable(0x88885cC572f2c0DD980e98D5D36cDF372EcaADD1));
+    TokenTransferorPool constant tokenTransferorPool =
+        TokenTransferorPool(
+            payable(0x88885cC572f2c0DD980e98D5D36cDF372EcaADD1)
+        );
 
     function run() external {
-
         PRIVATE_KEY = vm.envUint("PRIVATE_KEY");
 
         vm.createSelectFork("eth-sepolia");
@@ -26,7 +27,7 @@ contract DeployTokenTransferorPool is Script {
             1 ether
         );
 
-        tokenTransferorPool.transferTokensPayNative{value :fees }(
+        tokenTransferorPool.transferTokensPayNative{value: fees}(
             16015286601757825753,
             vm.addr(PRIVATE_KEY),
             address(0xe2CE4Ba73a987Fe13Aad9E21344C1E471654739F),
