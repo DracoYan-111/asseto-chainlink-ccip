@@ -15,7 +15,7 @@ contract DeployTokenTransferorPool is Script {
     address constant router1 = 0xE1053aE1857476f36A3C62580FF9b016E8EE8F6f;
 
     // https://docs.chain.link/ccip/directory/testnet/chain/ethereum-testnet-sepolia
-    address constant token2 = 0xe2CE4Ba73a987Fe13Aad9E21344C1E471654739F;
+    address constant token2 = 0x734bb43B503Ea50EBE58EB371e34263551cc3d28;
     address constant rmnProxy2 = 0xba3f6251de62dED61Ff98590cB2fDf6871FbB991;
     address constant router2 = 0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59;
 
@@ -25,7 +25,7 @@ contract DeployTokenTransferorPool is Script {
         vm.createSelectFork("bsc-testnet");
         vm.startBroadcast(PRIVATE_KEY);
 
-        TokenTransferorPool tokenTransferorPoolOne = new TokenTransferorPool(
+        TokenTransferorPool tokenTransferorPoolOne = new TokenTransferorPool{salt: salt}(
             IBurnMintERC20(token1),
             18,
             new address[](0),
