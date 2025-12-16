@@ -9,23 +9,23 @@ import {IBurnMintERC20} from "@chainlink/contracts/src/v0.8/shared/token/ERC20/I
 contract DeployTokenTransferorPool is Script {
     uint256 private PRIVATE_KEY;
 
-    // https://docs.chain.link/ccip/directory/testnet/chain/bsc-testnet
-    address constant token1 = 0x4013361546efe989Efd4a1242aDD5Ea88915e980;
-    address constant rmnProxy1 = 0xA8C0c11bf64AF62CDCA6f93D3769B88BdD7cb93D;
-    address constant router1 = 0xE1053aE1857476f36A3C62580FF9b016E8EE8F6f;
+    // https://docs.chain.link/ccip/directory/mainnet/chain/bsc-mainnet
+    address constant token1 = 0x1775504c5873e179Ea2f8ABFcE3861EC74D159bc;
+    address constant rmnProxy1 = 0x9e09697842194f77d315E0907F1Bda77922e8f84;
+    address constant router1 = 0x34B03Cb9086d7D758AC55af71584F81A598759FE;
 
-    // https://docs.chain.link/ccip/directory/testnet/chain/ethereum-testnet-sepolia
-    address constant token2 = 0x734bb43B503Ea50EBE58EB371e34263551cc3d28;
-    address constant rmnProxy2 = 0xba3f6251de62dED61Ff98590cB2fDf6871FbB991;
-    address constant router2 = 0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59;
+    // https://docs.chain.link/ccip/directory/mainnet/chain/mainnet
+    address constant token2 = 0x498D9329555471bF6073A5f2D047F746d522A373;
+    address constant rmnProxy2 = 0x411dE17f12D1A34ecC7F45f49844626267c75e81;
+    address constant router2 = 0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D;
 
     function run() external {
         PRIVATE_KEY = vm.envUint("PRIVATE_KEY");
 
-        vm.createSelectFork("bsc-testnet");
+        vm.createSelectFork("bsc-mainnet");
         vm.startBroadcast(PRIVATE_KEY);
 
-        TokenTransferorPool tokenTransferorPoolOne = new TokenTransferorPool{salt: salt}(
+        TokenTransferorPool tokenTransferorPoolOne = new TokenTransferorPool(
             IBurnMintERC20(token1),
             18,
             new address[](0),
@@ -37,7 +37,7 @@ contract DeployTokenTransferorPool is Script {
 
         console2.log("Implementation:", address(tokenTransferorPoolOne));
 
-        vm.createSelectFork("eth-sepolia");
+        vm.createSelectFork("eth-mainnet");
         vm.startBroadcast(PRIVATE_KEY);
 
         TokenTransferorPool tokenTransferorPoolTwo = new TokenTransferorPool(

@@ -29,11 +29,16 @@ remappings = [
 [rpc_endpoints]
 bsc-testnet = "${BSC_TESTNET_RPC_URL}"
 bsc-mainnet = "${BSC_MAINNET_RPC_URL}"
+
 eth-sepolia = "${ETH_SEPOLIA_RPC_URL}"
 eth-mainnet = "${ETH_MAINNET_RPC_URL}"
 
 [etherscan]
 bsc-testnet = {key="${ETHERSCAN_KEY}",url="${BSC_TESTNET_API_URL}"}
 bsc = {key="${ETHERSCAN_KEY}",url="${BSC_MAINNET_API_URL}"}
-eth = {key="${ETHERSCAN_KEY}",url="${ETH_MAINNET_API_URL}"}
+"56" = {key="${ETHERSCAN_KEY}",url="${BSC_MAINNET_API_URL}"}
+
 sepolia = {key="${ETHERSCAN_KEY}",url="${ETH_SEPOLIA_API_URL}"}
+eth = {key="${ETHERSCAN_KEY}",url="${ETH_MAINNET_API_URL}"}
+mainnet = {key="${ETHERSCAN_KEY}",url="${ETH_MAINNET_API_URL}"}
+"1" = {key="${ETHERSCAN_KEY}",url="${ETH_MAINNET_API_URL}"}

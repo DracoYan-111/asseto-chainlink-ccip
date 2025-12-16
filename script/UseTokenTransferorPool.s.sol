@@ -18,46 +18,46 @@ contract DeployTokenTransferorPool is Script {
 
     TokenTransferorPool constant tokenTransferorPool1 =
         TokenTransferorPool(
-            payable(0x25100992Bb97c2DE169cd9d3Db12EaFe72074f38)
+            payable(0xEB322952C9Ba0E204a1ab341Fc18832A9700D54a)
         );
-    address constant token1 = 0x4013361546efe989Efd4a1242aDD5Ea88915e980;
+    address constant token1 = 0x1775504c5873e179Ea2f8ABFcE3861EC74D159bc;
 
     Register.NetworkDetails public networkDetails1 =
         Register.NetworkDetails({
-            chainSelector: 13264668187771770619,
-            routerAddress: 0xE1053aE1857476f36A3C62580FF9b016E8EE8F6f,
-            linkAddress: 0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06,
-            wrappedNativeAddress: 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd,
+            chainSelector: 11344663589394136015,
+            routerAddress: 0x34B03Cb9086d7D758AC55af71584F81A598759FE,
+            linkAddress: 0x404460C6A5EdE2D891e8297795264fDe62ADBB75,
+            wrappedNativeAddress: 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c,
             ccipBnMAddress: 0x0000000000000000000000000000000000000000,
             ccipLnMAddress: 0x0000000000000000000000000000000000000000,
-            rmnProxyAddress: 0xA8C0c11bf64AF62CDCA6f93D3769B88BdD7cb93D,
-            registryModuleOwnerCustomAddress: 0x763685240370758c5ac6C5F7c22AB36684c0570E,
-            tokenAdminRegistryAddress: 0xF8f2A4466039Ac8adf9944fD67DBb3bb13888f2B
+            rmnProxyAddress: 0x9e09697842194f77d315E0907F1Bda77922e8f84,
+            registryModuleOwnerCustomAddress: 0x47Db76c9c97F4bcFd54D8872FDb848Cab696092d,
+            tokenAdminRegistryAddress: 0x736Fd8660c443547a85e4Eaf70A49C1b7Bb008fc
         });
 
     TokenTransferorPool constant tokenTransferorPool2 =
         TokenTransferorPool(
-            payable(0x5E4A22cA86b7Cd2D04CBb659F6B8C2f4E65E8B93)
+            payable(0xEB322952C9Ba0E204a1ab341Fc18832A9700D54a)
         );
-    address constant token2 = 0x734bb43B503Ea50EBE58EB371e34263551cc3d28;
+    address constant token2 = 0x498D9329555471bF6073A5f2D047F746d522A373;
 
     Register.NetworkDetails public networkDetails2 =
         Register.NetworkDetails({
-            chainSelector: 16015286601757825753,
-            routerAddress: 0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59,
-            linkAddress: 0x779877A7B0D9E8603169DdbD7836e478b4624789,
-            wrappedNativeAddress: 0x097D90c9d3E0B50Ca60e1ae45F6A81010f9FB534,
+            chainSelector: 5009297550715157269,
+            routerAddress: 0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D,
+            linkAddress: 0x514910771AF9Ca656af840dff83E8264EcF986CA,
+            wrappedNativeAddress: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
             ccipBnMAddress: 0x0000000000000000000000000000000000000000,
             ccipLnMAddress: 0x0000000000000000000000000000000000000000,
-            rmnProxyAddress: 0xba3f6251de62dED61Ff98590cB2fDf6871FbB991,
-            registryModuleOwnerCustomAddress: 0x62e731218d0D47305aba2BE3751E7EE9E5520790,
-            tokenAdminRegistryAddress: 0x95F29FEE11c5C55d26cCcf1DB6772DE953B37B82
+            rmnProxyAddress: 0x411dE17f12D1A34ecC7F45f49844626267c75e81,
+            registryModuleOwnerCustomAddress: 0x4855174E9479E211337832E109E7721d43A4CA64,
+            tokenAdminRegistryAddress: 0xb22764f98dD05c789929716D677382Df22C05Cb6
         });
 
     function run() external {
         PRIVATE_KEY = vm.envUint("PRIVATE_KEY");
 
-        vm.createSelectFork("bsc-testnet");
+        vm.createSelectFork("bsc-mainnet");
         vm.startBroadcast(PRIVATE_KEY);
 
         // token注册
@@ -70,7 +70,7 @@ contract DeployTokenTransferorPool is Script {
             address(token1),
             address(tokenTransferorPool1)
         );
-    
+
         TokenPool.ChainUpdate[]
             memory chainsToAdd1 = new TokenPool.ChainUpdate[](1);
         bytes[] memory poolAddresses1 = new bytes[](1);
@@ -86,7 +86,7 @@ contract DeployTokenTransferorPool is Script {
 
         vm.stopBroadcast();
 
-        vm.createSelectFork("eth-sepolia");
+        vm.createSelectFork("eth-mainnet");
         vm.startBroadcast(PRIVATE_KEY);
 
         // token注册
@@ -113,5 +113,49 @@ contract DeployTokenTransferorPool is Script {
         });
         tokenTransferorPool2.applyChainUpdates(new uint64[](0), chainsToAdd2);
         vm.stopBroadcast();
+
+        // 转移所有权
+        // uint256 privateKey2 = vm.envUint("PRIVATE_KEY2");
+        // address owner = vm.addr(privateKey2);
+
+        // tokenTransferorPool1.transferOwnership(owner);
+        // console2.log("owner", tokenTransferorPool1.owner());
+
+        // vm.stopBroadcast();
+
+        // vm.startBroadcast(privateKey2);
+
+        // tokenTransferorPool2.acceptOwnership();
+        // console2.log("owner", tokenTransferorPool2.owner());
+
+        // vm.stopBroadcast();
+
+
+        // uint256 privateKey2 = vm.envUint("PRIVATE_KEY2");
+        // vm.startBroadcast(privateKey2);
+
+        // // 批准 tokenTransferorPool1 花费 token1
+        // IERC20(token1).approve(address(tokenTransferorPool1), 0.02 ether);
+
+        // // 获取手续费
+        // uint256 fees = tokenTransferorPool1.getRouterFee(
+        //     networkDetails2.chainSelector,
+        //     vm.addr(privateKey2),
+        //     address(token1),
+        //     0.02 ether
+        // );
+        // console2.log("fees", fees);
+
+        // bytes32 messageId = tokenTransferorPool1.transferTokensPayNative{
+        //     value: fees
+        // }(
+        //     networkDetails2.chainSelector,
+        //     vm.addr(privateKey2),
+        //     address(token1),
+        //     0.02 ether
+        // );
+        // console2.logBytes32(messageId);
+
+        // vm.stopBroadcast();
     }
 }
