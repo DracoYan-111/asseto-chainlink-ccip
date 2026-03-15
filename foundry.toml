@@ -7,7 +7,7 @@ ast = true
 build_info = true
 extra_output = ["storageLayout"]
 evm_version = "cancun"
-
+auto_detect_solc = true
 out = "out"
 fs_permissions = [{ access = "read", path = "out" }]
 
@@ -18,10 +18,14 @@ remappings = [
   "@chainlink/contracts-ccip/contracts/=lib/ccip-starter-kit-foundry/lib/chainlink-ccip/chains/evm/contracts/",
   "@chainlink-local/contracts/=lib/ccip-starter-kit-foundry/lib/chainlink-local/src/",
 
+  # New CCIP develop branch (for FeeQuoter, OnRamp with latest interfaces)
+  "@chainlink/ccip-develop/=lib/ccip/contracts/src/v0.8/ccip/",
+  "@chainlink/ccip-shared/=lib/ccip/contracts/src/v0.8/",
+
   "@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
   "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
   "@openzeppelin-foundry-upgrades/=lib/openzeppelin-foundry-upgrades/src/",
-  
+
   "@openzeppelin/contracts@4.8.3/=lib/ccip-starter-kit-foundry/lib/openzeppelin-contracts-4.8.3/contracts/",
   "@openzeppelin/contracts@5.0.2/=lib/ccip-starter-kit-foundry/lib/openzeppelin-contracts-5.0.2/contracts/"
 ]

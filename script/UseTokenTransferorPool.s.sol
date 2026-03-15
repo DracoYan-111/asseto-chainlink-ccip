@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.27;
+pragma solidity 0.8.24;
 
 import "forge-std/Script.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
@@ -129,7 +129,6 @@ contract DeployTokenTransferorPool is Script {
         // console2.log("owner", tokenTransferorPool2.owner());
 
         // vm.stopBroadcast();
-
 
         // uint256 privateKey2 = vm.envUint("PRIVATE_KEY2");
         // vm.startBroadcast(privateKey2);

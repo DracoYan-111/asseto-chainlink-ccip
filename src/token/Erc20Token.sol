@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Compatible with OpenZeppelin Contracts ^5.5.0
-pragma solidity ^0.8.27;
+pragma solidity 0.8.24;
 
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
@@ -8,10 +8,12 @@ import {ERC20BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/toke
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
+import {ICashPlus} from "../interfaces/ICashPlus.sol";
+
 contract Erc20Token is
+    ICashPlus,
     Initializable,
     ERC20Upgradeable,
-    ERC20BurnableUpgradeable,
     AccessControlUpgradeable,
     UUPSUpgradeable
 {
@@ -36,7 +38,6 @@ contract Erc20Token is
         address upgrader
     ) public initializer {
         __ERC20_init("MyToken", "MTK");
-        __ERC20Burnable_init();
         __AccessControl_init();
         _setCCIPAdmin(defaultAdmin);
 
@@ -45,8 +46,50 @@ contract Erc20Token is
         _grantRole(UPGRADER_ROLE, upgrader);
     }
 
-    function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
+    function mint(
+        address to,
+        uint256 amount,
+        TokenData[] calldata tokenDatas,
+        uint256[] calldata amounts
+    ) external onlyRole(MINTER_ROLE) {
         _mint(to, amount);
+        // 暂时不用染色直接从事件打印
+        emit UseMockTokenData(to, amount, tokenDatas, amounts);
+    }
+
+    function burnFrom(
+        address from,
+        uint256 amount
+    )
+        external
+        returns (TokenData[] memory tokenDatas, uint256[] memory amounts)
+    {
+        _burn(from, amount);
+
+        // 生成固定的测试染色数据（3 笔，按 50%/30%/20% 拆分）
+        tokenDatas = new TokenData[](3);
+        amounts = new uint256[](3);
+
+        tokenDatas[0] = TokenData({
+            id: 1001,
+            tokenOwner: from,
+            chainId: block.chainid
+        });
+        amounts[0] = (amount * 50) / 100;
+
+        tokenDatas[1] = TokenData({
+            id: 1002,
+            tokenOwner: from,
+            chainId: block.chainid
+        });
+        amounts[1] = (amount * 30) / 100;
+
+        tokenDatas[2] = TokenData({
+            id: 1003,
+            tokenOwner: from,
+            chainId: block.chainid
+        });
+        amounts[2] = amount - amounts[0] - amounts[1];
     }
 
     function _authorizeUpgrade(

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.27;
+pragma solidity 0.8.24;
 
 import "forge-std/Script.sol";
 import {Upgrades} from "@openzeppelin-foundry-upgrades/Upgrades.sol";
-import {Erc20Token} from "../../src/token/Erc20Token.sol";
+import {ICashPlus, Erc20Token} from "../../src/token/Erc20Token.sol";
 import {RegistryModuleOwnerCustom} from "@chainlink/contracts-ccip/contracts/tokenAdminRegistry/RegistryModuleOwnerCustom.sol";
 import {ITokenAdminRegistry} from "@chainlink/contracts-ccip/contracts/interfaces/ITokenAdminRegistry.sol";
 import {TokenPool} from "@chainlink/contracts-ccip/contracts/pools/TokenPool.sol";
@@ -34,7 +34,17 @@ contract UseErc20Token is Script {
         vm.startBroadcast(PRIVATE_KEY);
 
         erc20Token.approve(address(tokenTransferorPool), 1000000 ether);
-        erc20Token.mint(deployer, 1000000 ether);
+
+        ICashPlus.TokenData[] memory tokenDatas = new ICashPlus.TokenData[](1);
+        uint256[] memory amounts = new uint256[](1);
+        tokenDatas[0] = ICashPlus.TokenData({
+            id: 1001,
+            tokenOwner: deployer,
+            chainId: block.chainid
+        });
+        amounts[0] = 1000000 ether;
+        erc20Token.mint(deployer, 1000000 ether, tokenDatas, amounts);
+
         erc20Token.grantRole(
             erc20Token.MINTER_ROLE(),
             address(tokenTransferorPool)

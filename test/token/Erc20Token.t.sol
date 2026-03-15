@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.27;
+pragma solidity 0.8.24;
 
 import "forge-std/Test.sol";
 
 import {Upgrades} from "@openzeppelin-foundry-upgrades/Upgrades.sol";
-import {Erc20Token} from "src/token/Erc20Token.sol";
+import {ICashPlus, Erc20Token} from "src/token/Erc20Token.sol";
 
 contract TestMyToken is Test {
     Erc20Token myToken;
@@ -31,14 +31,35 @@ contract TestMyToken is Test {
     function testMint() public {
         uint256 amount = 100;
         vm.prank(defaultAdmin);
-        myToken.mint(defaultAdmin, amount);
+
+        ICashPlus.TokenData[] memory tokenDatas = new ICashPlus.TokenData[](1);
+        uint256[] memory amounts = new uint256[](1);
+
+        tokenDatas[0] = ICashPlus.TokenData({
+            id: 1001,
+            tokenOwner: defaultAdmin,
+            chainId: block.chainid
+        });
+        amounts[0] = amount;
+
+        myToken.mint(defaultAdmin, amount, tokenDatas, amounts);
         assertEq(myToken.balanceOf(defaultAdmin), amount);
     }
 
     function testBurn() public {
         uint256 amount = 100;
         vm.prank(defaultAdmin);
-        myToken.mint(defaultAdmin, amount);
+        ICashPlus.TokenData[] memory tokenDatas = new ICashPlus.TokenData[](1);
+        uint256[] memory amounts = new uint256[](1);
+
+        tokenDatas[0] = ICashPlus.TokenData({
+            id: 1001,
+            tokenOwner: defaultAdmin,
+            chainId: block.chainid
+        });
+        amounts[0] = amount;
+
+        myToken.mint(defaultAdmin, amount, tokenDatas, amounts);
         assertEq(myToken.balanceOf(defaultAdmin), amount);
 
         vm.prank(defaultAdmin);
