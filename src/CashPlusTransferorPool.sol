@@ -11,12 +11,6 @@ import {ICashPlus} from "./interfaces/ICashPlus.sol";
 /// @title CashPlusTransferorPool
 /// @notice CCIP Token Pool for CashPlus cross-chain transfers using burn-and-mint mechanism.
 /// @dev Extends Chainlink TokenPool to handle CashPlus-specific TokenData encoding/decoding.
-///
-/// @dev Compact encoding format for destPoolData:
-/// [length: 2 bytes][element1][element2]...
-/// Each element: [id: 32 bytes][amount: 16 bytes][tokenOwner: 20 bytes][chainId: 8 bytes] = 76 bytes
-/// Total: 2 + (76 * length) bytes
-/// Note: amount is truncated to uint128, chainId to uint64
 contract CashPlusTransferorPool is TokenPool {
     using SafeERC20 for IERC20;
 
@@ -24,12 +18,34 @@ contract CashPlusTransferorPool is TokenPool {
     /// @dev UUPS proxy + abi.decode(TokenData[], uint256[]) + mint + event requires ~200k gas.
     uint256 public destGasLimit = 200_000;
 
+    /// @dev Tracks addresses allowed to call privileged transfer methods.
+    mapping(address account => bool allowed) private s_whitelist;
+
+    /// @notice If true, enforce whitelist checks for privileged transfer methods.
+    bool public whitelistEnabled;
+
     /// @notice Thrown when msg.value is insufficient to cover CCIP fees.
     error NotEnoughBalance(uint256 currentBalance, uint256 requiredBalance);
     /// @notice Thrown when the destination chain is not allowlisted.
     error DestinationChainNotAllowlisted(uint64 destinationChainSelector);
+    /// @notice Thrown when caller is not whitelisted.
+    error CallerNotWhitelisted(address caller);
+    /// @notice Thrown when attempting to whitelist the zero address.
+    error InvalidWhitelistAddress();
     /// @notice Thrown when the receiver address is zero.
     error InvalidReceiverAddress();
+    /// @notice Thrown when the token data is too long.
+    error TokenDataTooLong();
+    /// @notice Thrown when the refund failed.
+    error RefundFailed();
+    /// @notice Thrown when TokenData and amounts array lengths mismatch.
+    error LengthMismatch();
+    /// @notice Thrown when too many elements are provided.
+    error TooManyElements();
+    /// @notice Thrown when encoded pool data is too short.
+    error DataTooShort();
+    /// @notice Thrown when encoded pool data length is invalid.
+    error InvalidDataLength();
 
     /// @notice Emitted when tokens are transferred to another chain via CCIP.
     /// @param messageId The unique ID of the CCIP message.
@@ -49,9 +65,23 @@ contract CashPlusTransferorPool is TokenPool {
         uint256 fees
     );
 
+    /// @notice Emitted when whitelist status changes.
+    event WhitelistUpdated(address indexed account, bool allowed);
+
+    /// @notice Emitted when whitelist enforcement toggles.
+    event WhitelistEnabledUpdated(bool enabled);
+
     /// @dev Reverts if the receiver address is zero.
     modifier validateReceiver(address _receiver) {
         if (_receiver == address(0)) revert InvalidReceiverAddress();
+        _;
+    }
+
+    /// @dev Reverts if msg.sender is not in the whitelist.
+    modifier onlyWhitelisted() {
+        if (whitelistEnabled && !s_whitelist[msg.sender]) {
+            revert CallerNotWhitelisted(msg.sender);
+        }
         _;
     }
 
@@ -75,7 +105,42 @@ contract CashPlusTransferorPool is TokenPool {
             rmnProxy,
             router
         )
-    {}
+    {
+        whitelistEnabled = true;
+        _setWhitelist(owner(), true);
+        for (uint256 i = 0; i < allowlist.length; ++i) {
+            _setWhitelist(allowlist[i], true);
+        }
+    }
+
+    /// @notice Returns whether an address is whitelisted.
+    function isWhitelisted(address account) external view returns (bool) {
+        return s_whitelist[account];
+    }
+
+    /// @notice Batch updates whitelist status.
+    /// @dev Only callable by the owner.
+    function setWhitelistBatch(
+        address[] calldata accounts,
+        bool allowed
+    ) external onlyOwner {
+        for (uint256 i = 0; i < accounts.length; ++i) {
+            _setWhitelist(accounts[i], allowed);
+        }
+    }
+
+    /// @notice Enables or disables whitelist enforcement.
+    /// @dev Only callable by the owner.
+    function setWhitelistEnabled(bool enabled) external onlyOwner {
+        whitelistEnabled = enabled;
+        emit WhitelistEnabledUpdated(enabled);
+    }
+
+    function _setWhitelist(address account, bool allowed) internal {
+        if (account == address(0)) revert InvalidWhitelistAddress();
+        s_whitelist[account] = allowed;
+        emit WhitelistUpdated(account, allowed);
+    }
 
     /// @notice Sets the gas limit for destination chain execution.
     /// @dev Only callable by the owner.
@@ -99,7 +164,7 @@ contract CashPlusTransferorPool is TokenPool {
     )
         external
         payable
-        onlyOwner
+        onlyWhitelisted
         validateReceiver(_receiver)
         returns (bytes32 messageId)
     {
@@ -113,11 +178,13 @@ contract CashPlusTransferorPool is TokenPool {
             _amount
         );
 
-        if (fees > msg.value) {
-            revert NotEnoughBalance(msg.value, fees);
-        } else if (msg.value > fees) {
-            (bool success, ) = msg.sender.call{value: msg.value - fees}("");
-            require(success, "Refund failed");
+        if (fees != msg.value) {
+            if (fees > msg.value) {
+                revert NotEnoughBalance(msg.value, fees);
+            } else if (msg.value > fees) {
+                (bool success, ) = msg.sender.call{value: msg.value - fees}("");
+                if (!success) revert RefundFailed();
+            }
         }
 
         address router = getRouter();
@@ -213,6 +280,7 @@ contract CashPlusTransferorPool is TokenPool {
                 lockOrBurnIn.originalSender,
                 lockOrBurnIn.amount
             );
+        if (tokenDatas.length > 100) revert TokenDataTooLong();
 
         bytes memory destPoolData = _encodePoolData(tokenDatas, amounts);
 
@@ -275,8 +343,8 @@ contract CashPlusTransferorPool is TokenPool {
         uint256[] memory amounts
     ) internal pure returns (bytes memory) {
         uint256 length = tokenDatas.length;
-        require(length == amounts.length, "Length mismatch");
-        require(length <= type(uint16).max, "Too many elements");
+        if (length != amounts.length) revert LengthMismatch();
+        if (length > type(uint16).max) revert TooManyElements();
 
         // Calculate total size: 2 bytes length + 76 bytes per element
         bytes memory data = new bytes(2 + length * 76);
@@ -341,13 +409,13 @@ contract CashPlusTransferorPool is TokenPool {
             uint256 totalAmount
         )
     {
-        require(data.length >= 2, "Data too short");
+        if (data.length < 2) revert DataTooShort();
 
         // Read length from first 2 bytes
         uint256 length = (uint256(uint8(data[0])) << 8) |
             uint256(uint8(data[1]));
 
-        require(data.length == 2 + length * 76, "Invalid data length");
+        if (data.length != 2 + length * 76) revert InvalidDataLength();
 
         tokenDatas = new ICashPlus.TokenData[](length);
         amounts = new uint256[](length);
