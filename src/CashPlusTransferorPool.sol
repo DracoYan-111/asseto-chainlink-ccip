@@ -46,6 +46,8 @@ contract CashPlusTransferorPool is TokenPool {
     error DataTooShort();
     /// @notice Thrown when encoded pool data length is invalid.
     error InvalidDataLength();
+    /// @notice Thrown when the token decimals are invalid.
+    error InvalidDecimals(uint256 decimals);
 
     /// @notice Emitted when tokens are transferred to another chain via CCIP.
     /// @param messageId The unique ID of the CCIP message.
@@ -271,6 +273,9 @@ contract CashPlusTransferorPool is TokenPool {
     function lockOrBurn(
         Pool.LockOrBurnInV1 calldata lockOrBurnIn
     ) public virtual override returns (Pool.LockOrBurnOutV1 memory) {
+        uint256 decimals = ICashPlus(address(i_token)).decimals();
+        if (decimals != 18) revert InvalidDecimals(decimals);
+
         _validateLockOrBurn(lockOrBurnIn);
 
         (
@@ -307,6 +312,9 @@ contract CashPlusTransferorPool is TokenPool {
     function releaseOrMint(
         Pool.ReleaseOrMintInV1 calldata releaseOrMintIn
     ) public virtual override returns (Pool.ReleaseOrMintOutV1 memory) {
+        uint256 decimals = ICashPlus(address(i_token)).decimals();
+        if (decimals != 18) revert InvalidDecimals(decimals);
+        
         (
             ICashPlus.TokenData[] memory tokenDatas,
             uint256[] memory amounts,

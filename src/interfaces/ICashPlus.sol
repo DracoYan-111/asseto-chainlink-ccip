@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-interface ICashPlus {
+import {IERC20Metadata} from "@openzeppelin/contracts@4.8.3/token/ERC20/extensions/IERC20Metadata.sol";
+
+interface ICashPlus is IERC20Metadata {
     // TokenData structure to hold token ID and amount
     struct TokenData {
         uint256 id; // Token ID
